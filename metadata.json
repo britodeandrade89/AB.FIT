@@ -1,0 +1,8 @@
+{
+  "name": "ABFIT",
+  "description": "Assessoria de alta performance com IA, avaliação física e periodização.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "entities": {
+    "Exercise": {
+      "title": "Exercise",
+      "description": "A single exercise within a workout.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "sets": { "type": "number" },
+        "reps": { "type": "string" },
+        "rest": { "type": "number" },
+        "notes": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "actualReps": { "type": "array", "items": { "type": "number" } },
+        "actualWeight": { "type": "array", "items": { "type": "number" } }
+      },
+      "required": ["name", "sets", "reps"]
+    },
+    "Workout": {
+      "title": "Workout",
+      "description": "A workout plan for a student.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "exercises": { "type": "array", "items": { "$ref": "Exercise" } },
+        "muscleGroups": { "type": "array", "items": { "type": "string" } },
+        "difficulty": { "type": "string", "enum": ["Iniciante", "Intermediário", "Avançado"] },
+        "estimatedDuration": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "name", "exercises"]
+    },
+    "RunningStats": {
+      "title": "RunningStats",
+      "description": "Statistics for a single run.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "distance": { "type": "number" },
+        "duration": { "type": "number" },
+        "pace": { "type": "string" },
+        "heartRate": { "type": "number" },
+        "calories": { "type": "number" }
+      },
+      "required": ["studentId", "date", "distance", "duration", "pace"]
+    },
+    "NutritionLog": {
+      "title": "NutritionLog",
+      "description": "Daily nutrition log for a student.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "meals": { "type": "array", "items": { "type": "object" } },
+        "totals": { "$ref": "MacroNutrients" }
+      },
+      "required": ["studentId", "date", "totals"]
+    },
+    "MacroNutrients": {
+      "title": "MacroNutrients",
+      "description": "Macronutrient breakdown.",
+      "type": "object",
+      "properties": {
+        "calories": { "type": "number" },
+        "protein": { "type": "number" },
+        "carbs": { "type": "number" },
+        "fat": { "type": "number" }
+      }
+    },
+    "Student": {
+      "title": "Student",
+      "description": "A student profile.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "objective": { "type": "string" },
+        "lastWorkoutDate": { "type": "string", "format": "date-time" },
+        "role": { "type": "string", "enum": ["student", "professor"] }
+      },
+      "required": ["name", "email"]
+    }
+  },
+  "firestore": {
+    "workouts": {
+      "schema": "Workout",
+      "description": "Collection of workout plans."
+    },
+    "running_stats": {
+      "schema": "RunningStats",
+      "description": "Collection of running performance data."
+    },
+    "nutrition_logs": {
+      "schema": "NutritionLog",
+      "description": "Collection of daily nutrition logs."
+    },
+    "students": {
+      "schema": "Student",
+      "description": "Collection of student profiles."
+    }
+  }
+}

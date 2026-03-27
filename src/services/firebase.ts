@@ -2,19 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
+import firebaseConfig from '@/firebase-applet-config.json';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAxFmQtAjWqNoXpcGRnmAA_ouXsgw3RvT8",
-  authDomain: "meus-apps---cerebro.firebaseapp.com",
-  projectId: "meus-apps---cerebro",
-  storageBucket: "meus-apps---cerebro.firebasestorage.app",
-  messagingSenderId: "980266889768",
-  appId: "1:980266889768:web:e15e1a6ac46df2faa53b1d",
-  measurementId: "G-2C4DNZ5FM7"
-};
+console.log("Initializing Firebase with config:", firebaseConfig.projectId);
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const appId = firebaseConfig.projectId;
 
@@ -28,4 +21,6 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+export const analytics = (typeof window !== 'undefined' && firebaseConfig.measurementId) 
+  ? getAnalytics(app) 
+  : null;

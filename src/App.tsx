@@ -2,8 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavig
 import { ThemeProvider } from "./components/ThemeContext";
 import { BackgroundWrapper, SideNav, GlobalSyncIndicator, Logo } from "./components/Layout";
 import { useState, useEffect } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "./services/firebase";
 import { Menu } from "lucide-react";
 
 // Page Imports
@@ -18,7 +16,7 @@ import RunTrack from "./pages/RunTrack";
 import ProfessorDashboard from "./pages/ProfessorDashboard";
 
 function AppContent() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
   const [isProfessor, setIsProfessor] = useState(false);
@@ -26,14 +24,29 @@ function AppContent() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      // Simple check for professor status - can be expanded to Firestore check
-      setIsProfessor(user?.email === 'Britodeandrade@gmail.com');
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    console.log("Checking local session...");
+    const savedUser = localStorage.getItem('abfit-session');
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      setIsProfessor(parsedUser.role === 'professor' || parsedUser.email === 'Britodeandrade@gmail.com');
+    }
+    setLoading(false);
   }, []);
+
+  const handleLogin = (userData: any) => {
+    localStorage.setItem('abfit-session', JSON.stringify(userData));
+    setUser(userData);
+    setIsProfessor(userData.role === 'professor' || userData.email === 'Britodeandrade@gmail.com');
+    navigate('/');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('abfit-session');
+    setUser(null);
+    setIsProfessor(false);
+    navigate('/login');
+  };
 
   const getActiveView = () => {
     const path = location.pathname;
@@ -101,7 +114,7 @@ function AppContent() {
             <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
             <Route path="/periodization" element={user ? <Periodization /> : <Navigate to="/login" />} />
             <Route path="/run" element={user ? <RunTrack /> : <Navigate to="/login" />} />
-            <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+            <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>

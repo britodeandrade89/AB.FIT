@@ -45,6 +45,18 @@ service cloud.firestore {
     //   - meals: list of objects (optional)
     //   - totals: map (required)
     //
+    // Collection: workout_history
+    // Document ID: auto-generated
+    // Fields:
+    //   - studentId: string (required)
+    //   - workoutId: string (required)
+    //   - workoutName: string (optional)
+    //   - date: timestamp (required)
+    //   - duration: number (optional)
+    //   - totalVolume: number (optional)
+    //   - exercises: list of objects (required)
+    //   - type: string (required)
+    //
     // ===============================================================
 
     // ===============================================================
@@ -97,6 +109,13 @@ service cloud.firestore {
              data.totals is map;
     }
 
+    function isValidHistory(data) {
+      return data.keys().hasAll(['studentId', 'workoutId', 'date', 'exercises']) &&
+             data.studentId is string &&
+             data.workoutId is string &&
+             data.exercises is list;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -125,6 +144,13 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (request.auth.uid == resource.data.studentId || isAdmin());
       allow create: if isAuthenticated() && isValidNutrition(request.resource.data) && (request.auth.uid == request.resource.data.studentId || isAdmin());
       allow update: if isAuthenticated() && isValidNutrition(request.resource.data) && (request.auth.uid == resource.data.studentId || isAdmin());
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.studentId || isAdmin());
+    }
+
+    match /workout_history/{historyId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.studentId || isAdmin());
+      allow create: if isAuthenticated() && isValidHistory(request.resource.data) && (request.auth.uid == request.resource.data.studentId || isAdmin());
+      allow update: if isAuthenticated() && isValidHistory(request.resource.data) && (request.auth.uid == resource.data.studentId || isAdmin());
       allow delete: if isAuthenticated() && (request.auth.uid == resource.data.studentId || isAdmin());
     }
   }

@@ -62,12 +62,9 @@ export function HeaderTitle({ text }: { text: string }) {
   
   if (words.length === 1) {
     const word = words[0];
-    if (word.length <= 2) return <span className="text-red-600 uppercase italic tracking-tighter">{word}</span>;
-    const splitIndex = word.length > 3 ? word.length - 3 : word.length - 2;
     return (
       <span className="tracking-tighter uppercase italic text-foreground">
-        {word.substring(0, splitIndex)}
-        <span className="text-red-600">{word.substring(splitIndex)}</span>
+        {word}
       </span>
     );
   }

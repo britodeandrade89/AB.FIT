@@ -83,6 +83,22 @@
         "role": { "type": "string", "enum": ["student", "professor"] }
       },
       "required": ["name", "email"]
+    },
+    "WorkoutHistoryEntry": {
+      "title": "WorkoutHistoryEntry",
+      "description": "A record of a completed workout.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "workoutId": { "type": "string" },
+        "workoutName": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "duration": { "type": "number" },
+        "totalVolume": { "type": "number" },
+        "exercises": { "type": "array", "items": { "$ref": "Exercise" } },
+        "type": { "type": "string", "enum": ["STRENGTH", "RUNNING", "POST"] }
+      },
+      "required": ["studentId", "workoutId", "date", "exercises"]
     }
   },
   "firestore": {
@@ -101,6 +117,10 @@
     "students": {
       "schema": "Student",
       "description": "Collection of student profiles."
+    },
+    "workout_history": {
+      "schema": "WorkoutHistoryEntry",
+      "description": "Collection of completed workout records."
     }
   }
 }

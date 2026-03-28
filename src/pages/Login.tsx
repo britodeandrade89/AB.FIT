@@ -21,11 +21,29 @@ export default function Login({ onLogin }: LoginProps) {
       try {
         const q = query(collection(db, "students"), orderBy("name", "asc"));
         const snap = await getDocs(q);
-        setStudents(
-          snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Student),
-        );
+        
+        if (snap.empty) {
+          setStudents([
+            { id: '1', name: 'André Brito', email: 'andrevictorbrito@gmail.com', role: 'student' },
+            { id: '2', name: 'Liliane Torres', email: 'lilicatorres@gmail.com', role: 'student' },
+            { id: '3', name: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', role: 'student' },
+            { id: '4', name: 'Marcia Brito', email: 'marciabrito@gmail.com', role: 'student' },
+            { id: '5', name: 'Rebecca Brito', email: 'rebeccabrito@gmail.com', role: 'student' },
+          ]);
+        } else {
+          setStudents(
+            snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Student),
+          );
+        }
       } catch (error) {
         console.error("Error fetching students for login:", error);
+        setStudents([
+          { id: '1', name: 'André Brito', email: 'andrevictorbrito@gmail.com', role: 'student' },
+          { id: '2', name: 'Liliane Torres', email: 'lilicatorres@gmail.com', role: 'student' },
+          { id: '3', name: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', role: 'student' },
+          { id: '4', name: 'Marcia Brito', email: 'marciabrito@gmail.com', role: 'student' },
+          { id: '5', name: 'Rebecca Brito', email: 'rebeccabrito@gmail.com', role: 'student' },
+        ]);
       }
     };
     fetchStudents();
@@ -34,10 +52,10 @@ export default function Login({ onLogin }: LoginProps) {
   const filteredProfiles = [
     {
       id: "professor",
-      name: "PROFESSOR",
-      email: "professor",
+      name: "Me. André Brito",
+      email: "Britodeandrade@gmail.com",
       role: "professor",
-      photoURL: null,
+      photoURL: "https://picsum.photos/seed/coach/400/400",
     },
     ...students.map((s) => ({ ...s, role: "student" })),
   ].filter(

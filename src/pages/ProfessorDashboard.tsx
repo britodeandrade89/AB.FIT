@@ -37,6 +37,8 @@ export default function ProfessorDashboard() {
             { id: '1', name: 'André Brito', email: 'andrevictorbrito@gmail.com', role: 'student' },
             { id: '2', name: 'Liliane Torres', email: 'lilicatorres@gmail.com', role: 'student' },
             { id: '3', name: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', role: 'student' },
+            { id: '4', name: 'Marcia Brito', email: 'marciabrito@gmail.com', role: 'student' },
+            { id: '5', name: 'Rebecca Brito', email: 'rebeccabrito@gmail.com', role: 'student' },
           ];
           setStudents(mockStudents);
         } else {
@@ -49,6 +51,8 @@ export default function ProfessorDashboard() {
           { id: '1', name: 'André Brito', email: 'andrevictorbrito@gmail.com', role: 'student' },
           { id: '2', name: 'Liliane Torres', email: 'lilicatorres@gmail.com', role: 'student' },
           { id: '3', name: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', role: 'student' },
+          { id: '4', name: 'Marcia Brito', email: 'marciabrito@gmail.com', role: 'student' },
+          { id: '5', name: 'Rebecca Brito', email: 'rebeccabrito@gmail.com', role: 'student' },
         ]);
       } finally {
         setLoading(false);

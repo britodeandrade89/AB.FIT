@@ -31,9 +31,25 @@ export default function ProfessorDashboard() {
       try {
         const q = query(collection(db, 'students'), orderBy('name', 'asc'));
         const snap = await getDocs(q);
-        setStudents(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student)));
+        
+        if (snap.empty) {
+          const mockStudents: Student[] = [
+            { id: '1', name: 'André Brito', email: 'andrevictorbrito@gmail.com', role: 'student' },
+            { id: '2', name: 'Liliane Torres', email: 'lilicatorres@gmail.com', role: 'student' },
+            { id: '3', name: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', role: 'student' },
+          ];
+          setStudents(mockStudents);
+        } else {
+          setStudents(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student)));
+        }
       } catch (error) {
         console.error("Error fetching students:", error);
+        // Fallback on error
+        setStudents([
+          { id: '1', name: 'André Brito', email: 'andrevictorbrito@gmail.com', role: 'student' },
+          { id: '2', name: 'Liliane Torres', email: 'lilicatorres@gmail.com', role: 'student' },
+          { id: '3', name: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', role: 'student' },
+        ]);
       } finally {
         setLoading(false);
       }
@@ -231,40 +247,54 @@ export default function ProfessorDashboard() {
 
 function FeedGlobal({ onBack }: { onBack: () => void }) {
   return (
-    <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-24">
-      <div className="flex items-center justify-between bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-          <span className="text-[9px] font-black tracking-widest text-white/60 uppercase">FEED GLOBAL</span>
-        </div>
-        <button onClick={onBack} className="text-[9px] font-black tracking-widest text-red-600 uppercase">VOLTAR</button>
-      </div>
+    <div className="flex flex-col h-[calc(100vh-3rem)] animate-in slide-in-from-right duration-500">
+      {/* Header */}
+      <header className="flex items-center gap-4 pb-6 border-b border-white/5">
+        <button 
+          onClick={() => document.dispatchEvent(new CustomEvent('open-sidenav'))}
+          className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+        >
+          <Menu size={20} />
+        </button>
+        <button 
+          onClick={onBack}
+          className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <h1 className="text-sm font-black italic tracking-widest uppercase ml-2">
+          FEED GLOBAL <span className="text-red-600">ABFIT</span>
+        </h1>
+      </header>
 
-      <div className="flex flex-col items-center justify-center py-32 text-center space-y-6 opacity-30">
-        <div className="w-24 h-24 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center">
-          <Camera size={48} className="text-white/20" />
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center space-y-6 opacity-40">
+          <Camera size={64} strokeWidth={1.5} />
+          <p className="text-[10px] font-black uppercase tracking-[0.3em]">
+            Nenhum registro visual ainda
+          </p>
         </div>
-        <div className="space-y-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Nenhum registro visual ainda</p>
-          <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Aguardando uploads dos atletas</p>
-        </div>
-      </div>
+      </main>
 
-      <footer className="pt-12 pb-8 flex flex-col items-center space-y-8">
-        <div className="flex gap-4">
-          <button className="p-4 bg-white/5 border border-white/10 rounded-2xl text-white/20 hover:text-white transition-colors">
-            <Mail size={20} />
+      {/* Footer */}
+      <div className="w-full h-px bg-white/10 mb-12" />
+      
+      <footer className="pb-8 flex flex-col items-center space-y-8">
+        <div className="flex gap-6">
+          <button className="w-14 h-14 rounded-[1.5rem] bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+            <Mail size={20} strokeWidth={1.5} />
           </button>
-          <button className="p-4 bg-white/5 border border-white/10 rounded-2xl text-white/20 hover:text-white transition-colors">
-            <MessageCircle size={20} />
+          <button className="w-14 h-14 rounded-[1.5rem] bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+            <MessageCircle size={20} strokeWidth={1.5} />
           </button>
-          <button className="p-4 bg-white/5 border border-white/10 rounded-2xl text-white/20 hover:text-white transition-colors">
-            <Phone size={20} />
+          <button className="w-14 h-14 rounded-[1.5rem] bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+            <Phone size={20} strokeWidth={1.5} />
           </button>
         </div>
-        <div className="text-center space-y-1">
-          <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">ABFIT Performance v2.0</p>
-          <p className="text-[8px] font-bold text-white/10 uppercase tracking-widest">© 2025 Me. André Brito. All Rights Reserved.</p>
+        <div className="text-center space-y-3">
+          <p className="text-[11px] font-black text-white/80 uppercase tracking-[0.4em]">ABFIT PERFORMANCE V2.0</p>
+          <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">© 2025 ME. ANDRÉ BRITO. ALL RIGHTS RESERVED.</p>
         </div>
       </footer>
     </div>
@@ -275,6 +305,7 @@ function PrescreveAI({ onBack }: { onBack: () => void }) {
   const [mode, setMode] = useState<'ACADEMIA' | 'OUTDOOR'>('ACADEMIA');
   const [gender, setGender] = useState<'HOMEM' | 'MULHER'>('MULHER');
   const [filter, setFilter] = useState('TODOS');
+  const [selectedTeam, setSelectedTeam] = useState('ÁFRICA DO SUL 26');
 
   const filters = [
     'TODOS', 'PEITORAL', 'DORSAIS', 'OMBROS', 'BÍCEPS', 'TRÍCEPS', 
@@ -282,84 +313,113 @@ function PrescreveAI({ onBack }: { onBack: () => void }) {
     'PANTURRILHA', 'PARAVERTEBRAIS', 'ABDOMINAIS'
   ];
 
+  const teams = ['ÁFRICA DO SUL 26', 'REAL MADRID 01', 'FLAMENGO 01 (HOME)', 'FLAMENGO 01 (AWAY)'];
+
   return (
     <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-24">
-      <div className="flex items-center justify-between bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-          <span className="text-[9px] font-black tracking-widest text-white/60 uppercase">PRESCREVE AI</span>
-        </div>
-        <button onClick={onBack} className="text-[9px] font-black tracking-widest text-red-600 uppercase">VOLTAR</button>
-      </div>
+      {/* Back Button */}
+      <button onClick={onBack} className="flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all w-fit">
+        <ArrowLeft size={16} />
+        <span className="text-[11px] font-black uppercase tracking-widest">Voltar</span>
+      </button>
 
+      {/* Header */}
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center shadow-lg shadow-red-600/20">
-          <Sparkles size={32} className="text-white" />
+        <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-[#3b82f6] to-[#34d399] flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+          <Dumbbell size={48} className="text-white transform -rotate-45" strokeWidth={2.5} />
         </div>
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black uppercase italic tracking-tighter text-white leading-none">PrescreveAI</h1>
-          <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest border-t border-white/10 pt-1">Biomecânica de Alta Performance</p>
+        <div className="space-y-1.5 flex-1">
+          <h1 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[#3b82f6] to-[#34d399] leading-none">
+            PRESCREVEAI
+          </h1>
+          <div className="h-px w-full bg-white/20 my-2" />
+          <p className="text-[9px] sm:text-[10px] font-bold text-white/60 uppercase tracking-widest">
+            Prescrição e Biomecânica de Alta Performance
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 p-1 bg-white/5 border border-white/10 rounded-2xl">
+      {/* Mode Toggle */}
+      <div className="flex p-1.5 bg-white rounded-2xl shadow-lg">
         <button 
           onClick={() => setMode('ACADEMIA')}
-          className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'ACADEMIA' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'text-white/20'}`}
+          className={`flex-1 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${mode === 'ACADEMIA' ? 'bg-[#3b82f6] text-white shadow-md' : 'text-slate-800 hover:bg-slate-50'}`}
         >
           Academia
         </button>
         <button 
           onClick={() => setMode('OUTDOOR')}
-          className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'OUTDOOR' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'text-white/20'}`}
+          className={`flex-1 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${mode === 'OUTDOOR' ? 'bg-[#3b82f6] text-white shadow-md' : 'text-slate-800 hover:bg-slate-50'}`}
         >
           Outdoor / Casa
         </button>
       </div>
 
-      <div className="grid grid-cols-2 p-1 bg-white/5 border border-white/10 rounded-2xl">
+      {/* Gender Toggle */}
+      <div className="flex p-1.5 bg-white rounded-2xl shadow-lg">
         <button 
           onClick={() => setGender('HOMEM')}
-          className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${gender === 'HOMEM' ? 'bg-white/10 text-white' : 'text-white/20'}`}
+          className={`flex-1 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${gender === 'HOMEM' ? 'bg-[#1e293b] text-white shadow-md' : 'text-slate-800 hover:bg-slate-50'}`}
         >
           Homem
         </button>
         <button 
           onClick={() => setGender('MULHER')}
-          className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${gender === 'MULHER' ? 'bg-white/10 text-white' : 'text-white/20'}`}
+          className={`flex-1 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${gender === 'MULHER' ? 'bg-[#1e293b] text-white shadow-md' : 'text-slate-800 hover:bg-slate-50'}`}
         >
           Mulher
         </button>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-4 custom-scrollbar">
-        {['ÁFRICA DO SUL 26', 'REAL MADRID 81', 'FLAMENGO 81 (HOME)', 'FLAMENGO'].map((team) => (
-          <button key={team} className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl whitespace-nowrap group hover:border-red-600 transition-all">
-            <div className="w-4 h-4 text-red-600"><Layout size={16} /></div>
-            <span className="text-[9px] font-black uppercase italic tracking-widest text-white/40 group-hover:text-white">{team}</span>
-          </button>
-        ))}
+      {/* Teams Scroll */}
+      <div className="flex gap-3 overflow-x-auto pb-4 custom-scrollbar -mx-6 px-6 sm:mx-0 sm:px-0">
+        {teams.map((team) => {
+          const isSelected = selectedTeam === team;
+          return (
+            <button 
+              key={team} 
+              onClick={() => setSelectedTeam(team)}
+              className={`flex items-center gap-2.5 px-6 py-3.5 rounded-2xl whitespace-nowrap transition-all shadow-lg ${isSelected ? 'bg-[#3b82f6] text-white' : 'bg-white text-slate-800 hover:bg-slate-50'}`}
+            >
+              <div className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-slate-400'}`}>
+                {/* Using Layout as fallback for Shirt since Shirt might not be imported yet */}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a8.59 8.59 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest">{team}</span>
+            </button>
+          );
+        })}
       </div>
 
+      {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600" size={18} />
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#3b82f6]" size={24} />
         <input 
           type="text" 
-          placeholder="Qual exercício vamos prescrever?" 
-          className="w-full pl-12 pr-6 py-5 bg-white/5 border border-white/10 rounded-full text-[11px] font-bold text-white placeholder:text-white/20 focus:outline-none focus:border-red-600 transition-all shadow-xl"
+          placeholder="Qual o exercício de todos vamos prescrever?" 
+          className="w-full pl-16 pr-6 py-5 bg-white rounded-[2rem] text-[13px] font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3b82f6] transition-all shadow-xl"
         />
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      {/* Filters */}
+      <div className="flex flex-wrap justify-center gap-2.5">
         {filters.map((f) => (
           <button 
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${filter === f ? 'bg-red-600 text-white' : 'bg-white/5 text-white/40 border border-white/10'}`}
+            className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-md ${filter === f ? 'bg-[#3b82f6] text-white' : 'bg-white text-slate-400 hover:text-slate-800 hover:bg-slate-50'}`}
           >
             {f}
           </button>
         ))}
+      </div>
+
+      {/* Generate Image Button */}
+      <div className="pt-6">
+        <button className="w-full py-5 bg-gradient-to-r from-[#3b82f6] to-[#34d399] rounded-[2rem] flex items-center justify-center gap-3 text-white shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all group">
+          <Sparkles size={24} className="group-hover:animate-pulse" />
+          <span className="text-sm font-black uppercase tracking-widest">Gerar Imagem do Exercício</span>
+        </button>
       </div>
     </div>
   );
@@ -385,117 +445,95 @@ function StudentDetail({ student, onBack }: { student: Student, onBack: () => vo
   }, [student.id]);
 
   const menuItems = [
-    { id: 'PLANILHAS', label: 'Planilhas Ativas', icon: Dumbbell, color: 'border-red-600/50 text-red-600' },
-    { id: 'RUN', label: 'ABFIT RUN', icon: Footprints, color: 'border-red-600/50 text-red-600' },
-    { id: 'PERIODIZACAO', label: 'Periodização Mestre', icon: Brain, color: 'border-red-600/50 text-red-600' },
-    { id: 'AVALIACAO', label: 'Avaliação Física', icon: Ruler, color: 'border-red-600/50 text-red-600' },
-    { id: 'CORRE_RJ', label: 'Corre RJ 2026', icon: MapPin, color: 'border-red-600/50 text-red-600' },
-    { id: 'FEED', label: 'Feed Performance', icon: Layout, color: 'border-red-600/50 text-red-600' },
-    { id: 'ANALYTICS', label: 'Análise de Dados', icon: BarChart3, color: 'border-red-600/50 text-red-600' },
-    { id: 'HISTORY', label: 'Histórico de Treinos', icon: History, color: 'border-red-600/50 text-red-600' },
-    { id: 'ABOUT', label: 'Sobre a ABFIT', icon: Info, color: 'border-white/10 text-white/20' },
+    { id: 'PLANILHAS', label: 'Planilhas Ativas', icon: Dumbbell, color: 'border-orange-500/30 text-orange-500 bg-orange-500/20' },
+    { id: 'RUN', label: 'ABFIT RUN', icon: Footprints, color: 'border-rose-500/30 text-rose-500 bg-rose-500/20' },
+    { id: 'PERIODIZACAO', label: 'Periodização Mestre', icon: Brain, color: 'border-indigo-500/30 text-indigo-500 bg-indigo-500/20' },
+    { id: 'AVALIACAO', label: 'Avaliação Física', icon: Ruler, color: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/20' },
+    { id: 'CORRE_RJ', label: 'Corre RJ 2026', icon: MapPin, color: 'border-amber-500/30 text-amber-500 bg-amber-500/20' },
+    { id: 'FEED', label: 'Feed Performance', icon: Layout, color: 'border-red-500/30 text-red-500 bg-red-500/20' },
+    { id: 'ANALYTICS', label: 'Análise de Dados', icon: BarChart3, color: 'border-blue-500/30 text-blue-500 bg-blue-500/20' },
+    { id: 'HISTORY', label: 'Histórico de Treinos', icon: History, color: 'border-teal-500/30 text-teal-500 bg-teal-500/20' },
+    { id: 'ABOUT', label: 'Sobre a ABFIT', icon: Info, color: 'border-zinc-500/30 text-zinc-400 bg-zinc-500/20' },
   ];
 
+  // Split name for styling
+  const nameParts = student.name.split(' ');
+  const firstName = nameParts[0];
+  const lastName = nameParts.slice(1).join(' ');
+
   return (
-    <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-24">
-      <div className="flex items-center justify-between bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-          <span className="text-[9px] font-black tracking-widest text-white/60 uppercase">DETALHES DO ATLETA</span>
-        </div>
-        <button onClick={onBack} className="text-[9px] font-black tracking-widest text-red-600 uppercase">VOLTAR</button>
+    <div className="space-y-6 animate-in slide-in-from-right duration-500 pb-24">
+      {/* Header */}
+      <div className="flex items-center gap-4 px-2">
+        <button 
+          onClick={onBack} 
+          className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all"
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <h1 className="text-xl font-black uppercase italic tracking-tighter">
+          <span className="text-white">{firstName}</span>
+          {lastName && <span className="text-red-600 ml-1">{lastName}</span>}
+        </h1>
       </div>
 
-      <div className="flex items-center gap-6 p-6 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-2xl">
-        <div className="w-20 h-20 rounded-[1.5rem] bg-white/5 border border-white/10 flex items-center justify-center text-white/20 overflow-hidden">
-          {student.photoURL ? (
-            <img src={student.photoURL} alt={student.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-          ) : (
-            <User size={32} className="opacity-20" />
-          )}
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white leading-none">
-            <HeaderTitle text={student.name} />
-          </h2>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{student.email}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        {menuItems.slice(0, 6).map((item) => (
+      {/* Menu Items List */}
+      <div className="space-y-3">
+        {menuItems.map((item) => (
           <button
             key={item.id}
-            className="p-6 bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-[2.5rem] text-left space-y-4 group hover:border-red-600/50 transition-all shadow-xl"
+            className={`w-full flex items-center justify-between p-4 bg-[#0a0a0a] border rounded-2xl transition-all group hover:bg-white/5 ${item.color.split(' ')[0]}`}
           >
-            <div className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center ${item.color.split(' ')[1]} transition-colors`}>
-              <item.icon size={22} />
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.color.split(' ')[2]} ${item.color.split(' ')[1]}`}>
+                <item.icon size={18} />
+              </div>
+              <span className="text-[11px] font-black uppercase italic tracking-widest text-white">{item.label}</span>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-[10px] font-black uppercase italic tracking-tighter text-white">{item.label}</h3>
-              <p className="text-[7px] font-bold text-white/20 uppercase tracking-widest">Acessar Módulo</p>
-            </div>
+            <ChevronRight size={18} className={item.color.split(' ')[1]} />
           </button>
         ))}
       </div>
 
-      <div className="space-y-6 pt-4">
+      {/* Workouts Section */}
+      <div className="space-y-4 pt-6">
         <div className="flex items-center justify-between px-2">
-          <div className="flex items-center gap-2">
-            <Dumbbell size={14} className="text-red-600" />
-            <h2 className="text-[11px] font-black uppercase italic tracking-widest text-white">PLANILHAS ATIVAS</h2>
-          </div>
-          <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white/40 uppercase tracking-widest">
+          <h2 className="text-[10px] font-black uppercase italic tracking-[0.2em] text-white/40">GERENCIAR PLANILHAS</h2>
+          <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-md text-[9px] font-black text-white/60 uppercase tracking-widest">
             {workouts.length} ATIVAS
           </span>
         </div>
 
         <div className="space-y-3">
           {workouts.map((workout) => (
-            <div key={workout.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-[2.5rem] shadow-xl group hover:border-red-600/30 transition-all">
+            <div key={workout.id} className="flex items-center justify-between p-5 bg-[#0a0a0a] border border-white/5 rounded-2xl group hover:border-white/10 transition-all">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-red-600">
-                  <FileText size={18} />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-sm font-black uppercase italic tracking-tighter text-white group-hover:text-red-600 transition-colors">{workout.name}</h4>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-white/20">Publicado em {new Date(workout.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
+                <h4 className="text-sm font-black uppercase italic tracking-tighter text-white">{workout.name}</h4>
+                <span className="px-2 py-0.5 rounded border border-emerald-500/30 text-[8px] font-black uppercase tracking-widest text-emerald-500">Publicado</span>
               </div>
-              <button className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/20 hover:text-red-600 hover:border-red-600 transition-all">
+              <button className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all">
                 <Edit2 size={16} />
               </button>
             </div>
           ))}
 
           {workouts.length === 0 && !loading && (
-            <div className="py-12 text-center space-y-4 opacity-20 border-2 border-dashed border-white/5 rounded-[2.5rem]">
-              <FileText size={32} className="mx-auto" />
+            <div className="py-8 text-center space-y-3 opacity-40 border border-dashed border-white/10 rounded-2xl">
+              <FileText size={24} className="mx-auto" />
               <p className="text-[9px] font-black uppercase tracking-widest">Nenhuma planilha vinculada</p>
             </div>
           )}
         </div>
 
-        <div className="space-y-4 pt-4">
-          <button className="w-full py-6 border-2 border-dashed border-white/10 rounded-[2.5rem] flex items-center justify-center gap-3 text-white/20 hover:border-red-600/50 hover:text-red-600 transition-all group">
-            <PlusCircle size={20} className="group-hover:scale-110 transition-transform" />
+        <div className="space-y-3 pt-2">
+          <button className="w-full py-5 border border-dashed border-white/10 rounded-2xl flex items-center justify-center gap-3 text-white/40 hover:border-white/20 hover:text-white transition-all group bg-[#0a0a0a]">
+            <Plus size={16} />
             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Novo Treino (Editor Padrão)</span>
           </button>
           
-          <button className="w-full py-8 bg-red-600 rounded-[2.5rem] flex items-center justify-center gap-4 text-white shadow-2xl shadow-red-600/40 hover:scale-[1.02] active:scale-95 transition-all group">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <Sparkles size={20} className="animate-pulse" />
-            </div>
-            <div className="text-left">
-              <span className="block text-sm font-black uppercase italic tracking-widest leading-none">Criar Treino</span>
-              <span className="text-[8px] font-black uppercase tracking-widest opacity-60">ABFIT AI Biomecânica</span>
-            </div>
+          <button className="w-full py-5 bg-[#c81e1e] hover:bg-[#b91c1c] rounded-2xl flex items-center justify-center gap-3 text-white transition-all shadow-lg shadow-red-900/20">
+            <Sparkles size={18} />
+            <span className="text-[11px] font-black uppercase tracking-widest">Criar Treino (ABFIT AI)</span>
           </button>
         </div>
       </div>

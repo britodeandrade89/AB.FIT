@@ -32,6 +32,10 @@ function AppContent() {
       setIsProfessor(parsedUser.role === 'professor' || parsedUser.email === 'Britodeandrade@gmail.com');
     }
     setLoading(false);
+
+    const handleOpenSidenav = () => setIsSideNavOpen(true);
+    document.addEventListener('open-sidenav', handleOpenSidenav);
+    return () => document.removeEventListener('open-sidenav', handleOpenSidenav);
   }, []);
 
   const handleLogin = (userData: any) => {
@@ -88,23 +92,15 @@ function AppContent() {
     <BackgroundWrapper>
       <div className="flex min-h-screen">
         {user && (
-          <>
-            <SideNav 
-              isOpen={isSideNavOpen} 
-              onClose={() => setIsSideNavOpen(false)} 
-              activeView={getActiveView()}
-              onNavigate={handleNavigate}
-              isProfessor={isProfessor}
-            />
-            <button 
-              onClick={() => setIsSideNavOpen(true)}
-              className="fixed top-6 left-6 z-[70] p-3 bg-card border border-border rounded-xl text-muted-foreground hover:text-foreground shadow-2xl transition-all hover:scale-110"
-            >
-              <Menu size={20} />
-            </button>
-          </>
+          <SideNav 
+            isOpen={isSideNavOpen} 
+            onClose={() => setIsSideNavOpen(false)} 
+            activeView={getActiveView()}
+            onNavigate={handleNavigate}
+            isProfessor={isProfessor}
+          />
         )}
-        <main className={`flex-1 overflow-auto transition-all duration-500 ${user ? 'pt-20 lg:pt-0' : ''}`}>
+        <main className="flex-1 overflow-auto transition-all duration-500">
           <Routes>
             <Route path="/" element={user ? (isProfessor ? <Navigate to="/professor" /> : <Home />) : <Navigate to="/login" />} />
             <Route path="/professor" element={user && isProfessor ? <ProfessorDashboard /> : <Navigate to="/" />} />

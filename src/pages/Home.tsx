@@ -3,9 +3,9 @@ import {
   Dumbbell, Footprints, Brain, Ruler, 
   MapPin, Layout, BarChart3, Info, 
   LogOut, Mail, MessageCircle, Phone,
-  Camera, RefreshCw
+  Camera, RefreshCw, Menu
 } from 'lucide-react';
-import { Logo, BackgroundCarousel, FITNESS_IMAGES, AppFooter } from '../components/Layout';
+import { Logo, BackgroundCarousel, FITNESS_IMAGES } from '../components/Layout';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,11 +34,12 @@ export default function Home() {
     <div className="relative min-h-screen flex flex-col items-center pt-12 pb-20 px-6 overflow-x-hidden">
       <BackgroundCarousel images={FITNESS_IMAGES} />
       
-      {/* Status Bar */}
-      <div className="absolute top-6 right-6 flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
-        <RefreshCw size={14} className="text-white/60 animate-spin" />
-        <span className="text-[10px] font-black tracking-[0.2em] text-white/80 uppercase">CARREGANDO...</span>
-      </div>
+      <button 
+        onClick={() => document.dispatchEvent(new CustomEvent('open-sidenav'))}
+        className="absolute top-6 left-6 z-[70] p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white shadow-2xl transition-all hover:scale-110"
+      >
+        <Menu size={20} />
+      </button>
 
       <motion.div 
         initial={{ opacity: 0, y: -20 }}

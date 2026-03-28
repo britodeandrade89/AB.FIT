@@ -96,15 +96,12 @@ export default function Nutrition() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6 sm:p-10 space-y-8 max-w-3xl mx-auto relative pb-20">
-      {/* Status Bar */}
-      <div className="absolute top-6 right-6 flex items-center gap-3 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl z-10">
-        <RefreshCw size={12} className="text-white/40 animate-spin" />
-        <span className="text-[9px] font-black tracking-widest text-white/60 uppercase">CARREGANDO...</span>
-      </div>
-
       <header className="flex items-center justify-between pt-4 mb-12">
         <div className="flex items-center gap-4">
-          <button className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40">
+          <button 
+            onClick={() => document.dispatchEvent(new CustomEvent('open-sidenav'))}
+            className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"
+          >
             <Menu size={20} />
           </button>
           <button 

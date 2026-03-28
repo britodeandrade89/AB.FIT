@@ -61,7 +61,7 @@ export default function Login({ onLogin }: LoginProps) {
 
   return (
     <BackgroundWrapper>
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-black">
+      <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-transparent">
         <div className="w-full max-w-md space-y-8 text-center">
           <Logo size="text-6xl" subSize="text-sm" />
 

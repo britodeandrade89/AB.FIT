@@ -74,25 +74,21 @@ export default function ProfessorDashboard() {
       default:
         return (
           <div className="space-y-8 animate-in fade-in duration-700 pb-24">
-            {/* Status Bar */}
-            <div className="flex items-center justify-between bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-                <span className="text-[9px] font-black tracking-widest text-white/60 uppercase">SISTEMA ATIVO</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <RefreshCw size={10} className="text-white/40 animate-spin" />
-                <span className="text-[9px] font-black tracking-widest text-white/60 uppercase">SINCRONIZADO</span>
-              </div>
-            </div>
-
             <header className="flex items-center justify-between gap-4">
-              <button 
-                onClick={() => setView('PROFESSOR_PROFILE')}
-                className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-red-600 transition-all"
-              >
-                <User size={20} />
-              </button>
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => document.dispatchEvent(new CustomEvent('open-sidenav'))}
+                  className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"
+                >
+                  <Menu size={20} />
+                </button>
+                <button 
+                  onClick={() => setView('PROFESSOR_PROFILE')}
+                  className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-red-600 transition-all"
+                >
+                  <User size={20} />
+                </button>
+              </div>
               <div className="flex-1 max-w-md relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
                 <input 

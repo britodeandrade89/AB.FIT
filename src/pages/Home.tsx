@@ -1,217 +1,130 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
-  Activity, Calendar, TrendingUp, 
-  ChevronRight, Clock, Target, 
-  Flame, Heart, Zap, Brain,
-  BarChart3, Ruler, Search
+  Dumbbell, Footprints, Brain, Ruler, 
+  MapPin, Layout, BarChart3, Info, 
+  LogOut, Mail, MessageCircle, Phone,
+  Camera, RefreshCw
 } from 'lucide-react';
-import { Card, HeaderTitle, WeatherWidget } from '../components/Layout';
+import { Logo, BackgroundCarousel, FITNESS_IMAGES, AppFooter } from '../components/Layout';
 import { motion } from 'framer-motion';
-import { auth, db } from '../services/firebase';
-import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
-import { WorkoutHistoryEntry } from '../types';
 import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
-  const [recentWorkouts, setRecentWorkouts] = useState<WorkoutHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const savedUser = localStorage.getItem('abfit-session');
+  const user = savedUser ? JSON.parse(savedUser) : null;
 
-  useEffect(() => {
-    const fetchRecentWorkouts = async () => {
-      if (!auth.currentUser) return;
-      try {
-        const q = query(
-          collection(db, 'workout_history'), 
-          where('studentId', '==', auth.currentUser.uid),
-          orderBy('date', 'desc'),
-          limit(3)
-        );
-        const snap = await getDocs(q);
-        setRecentWorkouts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as WorkoutHistoryEntry)));
-      } catch (error) {
-        console.error("Error fetching recent workouts:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const menuItems = [
+    { id: 'WORKOUTS', label: 'PLANILHAS ATIVAS', icon: Dumbbell, color: 'from-orange-600/20 to-orange-900/40', borderColor: 'border-orange-500/30', iconColor: 'text-orange-500', path: '/workouts' },
+    { id: 'RUN', label: 'ABFIT RUN', icon: Footprints, color: 'from-rose-600/20 to-rose-900/40', borderColor: 'border-rose-500/30', iconColor: 'text-rose-500', path: '/run' },
+    { id: 'PERIODIZATION', label: 'PERIODIZAÇÃO MESTRE', icon: Brain, color: 'from-indigo-600/20 to-indigo-900/40', borderColor: 'border-indigo-500/30', iconColor: 'text-indigo-500', path: '/periodization' },
+    { id: 'ASSESSMENT', label: 'AVALIAÇÃO FÍSICA', icon: Ruler, color: 'from-emerald-600/20 to-emerald-900/40', borderColor: 'border-emerald-500/30', iconColor: 'text-emerald-500', path: '/assessment' },
+    { id: 'CORRE_RJ', label: 'CORRE RJ 2026', icon: MapPin, color: 'from-yellow-600/20 to-yellow-900/40', borderColor: 'border-yellow-500/30', iconColor: 'text-yellow-500', path: '/corre-rj' },
+    { id: 'FEED', label: 'FEED PERFORMANCE', icon: Layout, color: 'from-red-600/20 to-red-900/40', borderColor: 'border-red-500/30', iconColor: 'text-red-500', path: '/feed' },
+    { id: 'ANALYTICS', label: 'ANÁLISE DE DADOS', icon: BarChart3, color: 'from-blue-600/20 to-blue-900/40', borderColor: 'border-blue-500/30', iconColor: 'text-blue-500', path: '/analytics' },
+    { id: 'ABOUT', label: 'SOBRE A ABFIT', icon: Info, color: 'from-zinc-600/20 to-zinc-900/40', borderColor: 'border-zinc-500/30', iconColor: 'text-zinc-500', path: '/about' },
+  ];
 
-    fetchRecentWorkouts();
-  }, []);
+  const handleLogout = () => {
+    localStorage.removeItem('abfit-session');
+    window.location.href = '/login';
+  };
 
   return (
-    <div className="p-6 sm:p-10 space-y-10 max-w-7xl mx-auto">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-5xl font-black italic tracking-tighter uppercase leading-none">
-            <HeaderTitle text={`OLÁ, ${auth.currentUser?.displayName?.split(' ')[0] || 'ATLETA'}`} />
-          </h1>
-          <p className="text-sm font-bold text-muted-foreground uppercase tracking-[0.3em] opacity-80">
-            Seu progresso está sendo monitorado.
-          </p>
-        </div>
-        <WeatherWidget />
-      </header>
-
-      <div className="grid lg:grid-cols-4 gap-6">
-        <Card className="p-6 space-y-2 group hover:border-red-600/50 transition-all">
-          <Activity className="text-red-600/40 group-hover:text-red-600 transition-colors" size={20} />
-          <span className="block text-3xl font-black italic tracking-tighter text-foreground leading-none">84%</span>
-          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block">Adesão Semanal</span>
-        </Card>
-        <Card className="p-6 space-y-2 group hover:border-red-600/50 transition-all">
-          <Flame className="text-red-600/40 group-hover:text-red-600 transition-colors" size={20} />
-          <span className="block text-3xl font-black italic tracking-tighter text-foreground leading-none">12.4k</span>
-          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block">Calorias (Mês)</span>
-        </Card>
-        <Card className="p-6 space-y-2 group hover:border-red-600/50 transition-all">
-          <Zap className="text-red-600/40 group-hover:text-red-600 transition-colors" size={20} />
-          <span className="block text-3xl font-black italic tracking-tighter text-foreground leading-none">42</span>
-          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block">Treinos Concluídos</span>
-        </Card>
-        <Card className="p-6 space-y-2 group hover:border-red-600/50 transition-all">
-          <TrendingUp className="text-red-600/40 group-hover:text-red-600 transition-colors" size={20} />
-          <span className="block text-3xl font-black italic tracking-tighter text-foreground leading-none">+12%</span>
-          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest block">Evolução de Carga</span>
-        </Card>
+    <div className="relative min-h-screen flex flex-col items-center pt-12 pb-20 px-6 overflow-x-hidden">
+      <BackgroundCarousel images={FITNESS_IMAGES} />
+      
+      {/* Status Bar */}
+      <div className="absolute top-6 right-6 flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
+        <RefreshCw size={14} className="text-white/60 animate-spin" />
+        <span className="text-[10px] font-black tracking-[0.2em] text-white/80 uppercase">CARREGANDO...</span>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-black italic uppercase tracking-tighter text-foreground">
-                Treinos <span className="text-red-600">Recentes</span>
-              </h2>
-              <button 
-                onClick={() => navigate('/workouts')}
-                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-red-600 transition-colors flex items-center gap-2"
-              >
-                Ver Todos <ChevronRight size={14} />
-              </button>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {recentWorkouts.length > 0 ? (
-                recentWorkouts.map((workout, idx) => (
-                  <motion.div
-                    key={workout.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                  >
-                    <Card className="p-6 group hover:bg-secondary/30 transition-colors cursor-pointer border-l-4 border-l-red-600">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-inner">
-                          <Activity className="text-red-600" size={18} />
-                        </div>
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                          {new Date(workout.date).toLocaleDateString('pt-BR')}
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-black italic uppercase tracking-tighter text-foreground leading-none mb-2">
-                        {workout.workoutName}
-                      </h3>
-                      <div className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                        <span className="flex items-center gap-1.5"><Clock size={12} /> {workout.duration} min</span>
-                        <span className="flex items-center gap-1.5"><Zap size={12} /> {workout.totalVolume}kg</span>
-                      </div>
-                    </Card>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="col-span-2 p-12 text-center border-2 border-dashed border-border rounded-[2rem]">
-                  <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Nenhum treino registrado ainda.</p>
-                </div>
-              )}
-            </div>
-          </section>
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-12"
+      >
+        <Logo size="text-5xl" subSize="text-[10px]" />
+      </motion.div>
 
-          <section className="space-y-6">
-            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-foreground">
-              Metas <span className="text-red-600">Ativas</span>
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Card className="p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-600/10 rounded-lg">
-                    <Target className="text-emerald-600" size={16} />
-                  </div>
-                  <span className="text-xs font-black uppercase italic tracking-widest">Peso Corporal</span>
-                </div>
-                <p className="text-sm font-bold text-muted-foreground leading-relaxed">Atingir 82kg com 12% de BF até o final do semestre.</p>
-                <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div className="w-[65%] h-full bg-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                </div>
-              </Card>
-              <Card className="p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-600/10 rounded-lg">
-                    <Brain className="text-indigo-600" size={16} />
-                  </div>
-                  <span className="text-xs font-black uppercase italic tracking-widest">Periodização</span>
-                </div>
-                <p className="text-sm font-bold text-muted-foreground leading-relaxed">Finalizar o mesociclo de hipertrofia com 95% de adesão.</p>
-                <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div className="w-[85%] h-full bg-indigo-600 shadow-[0_0_10px_rgba(79,70,229,0.5)]" />
-                </div>
-              </Card>
+      {/* Profile Section */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
+        className="flex flex-col items-center mb-12"
+      >
+        <div className="relative mb-6">
+          <div className="w-28 h-28 rounded-[2.5rem] bg-zinc-800 border-2 border-red-600/50 flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(220,38,38,0.2)]">
+            <div className="text-zinc-600">
+              <Camera size={40} />
             </div>
-          </section>
+          </div>
+          <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-red-600 rounded-full border-2 border-black flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+            <Camera size={14} className="text-white" />
+          </button>
         </div>
+        <h2 className="text-2xl font-black italic tracking-tighter text-white uppercase">
+          {user?.displayName || 'ANDRÉ BRITO'}
+        </h2>
+      </motion.div>
 
-        <div className="space-y-8">
-          <Card className="p-8 space-y-6 bg-gradient-to-br from-card to-secondary/20">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-black italic uppercase tracking-tighter text-foreground">
-                Status <span className="text-red-600">Físico</span>
-              </h3>
-              <Ruler className="text-muted-foreground/40" size={18} />
+      {/* Menu Grid */}
+      <div className="w-full max-w-md space-y-4 mb-12">
+        {menuItems.map((item, idx) => (
+          <motion.button
+            key={item.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 + idx * 0.05 }}
+            onClick={() => navigate(item.path)}
+            className={`w-full group relative flex items-center gap-6 p-1 rounded-[1.8rem] border ${item.borderColor} bg-gradient-to-r ${item.color} backdrop-blur-md hover:scale-[1.02] transition-all duration-300 shadow-xl overflow-hidden`}
+          >
+            <div className={`w-14 h-14 rounded-2xl bg-black/40 flex items-center justify-center ${item.iconColor} shadow-inner group-hover:scale-110 transition-transform`}>
+              <item.icon size={24} />
             </div>
-            <div className="space-y-6">
-              <div className="flex justify-between items-end">
-                <div className="flex flex-col">
-                  <span className="text-3xl font-black italic tracking-tighter text-foreground leading-none">24.2</span>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">IMC Atual</span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-3xl font-black italic tracking-tighter text-foreground leading-none">14%</span>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-2">Gordura Corporal</span>
-                </div>
-              </div>
-              <div className="pt-6 border-t border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground tracking-widest">Peso Meta</span>
-                  <span className="text-[10px] font-black uppercase italic text-foreground tracking-widest">82kg / 85kg</span>
-                </div>
-                <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
-                  <div className="w-[92%] h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                </div>
-              </div>
-            </div>
-          </Card>
+            <span className="text-sm font-black italic tracking-widest text-white uppercase">
+              {item.label}
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          </motion.button>
+        ))}
 
-          <Card className="p-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-black italic uppercase tracking-tighter text-foreground">
-                Insights <span className="text-red-600">IA</span>
-              </h3>
-              <BarChart3 className="text-muted-foreground/40" size={18} />
-            </div>
-            <div className="space-y-4">
-              <div className="p-4 bg-secondary/30 rounded-2xl border border-border/50">
-                <p className="text-xs font-bold text-muted-foreground leading-relaxed italic">
-                  "Seu volume de treino aumentou 15% esta semana. Mantenha o foco na recuperação e hidratação."
-                </p>
-              </div>
-              <div className="p-4 bg-secondary/30 rounded-2xl border border-border/50">
-                <p className="text-xs font-bold text-muted-foreground leading-relaxed italic">
-                  "Baseado no seu sono, hoje é um ótimo dia para um treino de alta intensidade."
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
+        {/* Logout Button */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-4 p-5 rounded-[1.8rem] border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all group mt-8"
+        >
+          <LogOut size={18} className="text-white/40 group-hover:text-red-600 transition-colors" />
+          <span className="text-xs font-black tracking-[0.3em] text-white/60 uppercase">FINALIZAR SESSÃO</span>
+        </motion.button>
       </div>
+
+      {/* Footer */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="w-full max-w-md pt-12 border-t border-white/10 text-center"
+      >
+        <div className="flex justify-center gap-6 mb-8">
+          <button className="p-4 bg-white/5 rounded-2xl text-white/40 hover:text-red-600 transition-all border border-white/5">
+            <Mail size={20} />
+          </button>
+          <button className="p-4 bg-white/5 rounded-2xl text-white/40 hover:text-emerald-600 transition-all border border-white/5">
+            <MessageCircle size={20} />
+          </button>
+          <button className="p-4 bg-white/5 rounded-2xl text-white/40 hover:text-blue-600 transition-all border border-white/5">
+            <Phone size={20} />
+          </button>
+        </div>
+        <p className="text-[11px] font-black text-white/30 uppercase tracking-[0.5em] mb-2">ABFIT PERFORMANCE V2.0</p>
+        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">© 2025 ME. ANDRÉ BRITO. ALL RIGHTS RESERVED.</p>
+      </motion.div>
     </div>
   );
 }

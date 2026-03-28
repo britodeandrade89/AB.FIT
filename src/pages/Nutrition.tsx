@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Utensils, Plus, Search, TrendingUp, 
+  Utensils, ArrowLeft, Menu, TrendingUp, 
   Clock, Flame, Apple, Brain, 
   ChevronRight, Trash2, Loader2, PieChart as PieChartIcon,
-  BarChart3, Camera, Sparkles
+  BarChart3, Camera, Sparkles, RefreshCw, Plus
 } from 'lucide-react';
-import { Card, HeaderTitle } from '../components/Layout';
+import { Card } from '../components/Layout';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../services/firebase';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, limit, orderBy } from 'firebase/firestore';
-import { NutritionLog, MacroNutrients } from '../types';
+import { NutritionLog } from '../types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { estimateFoodMacros, generateAIMealPlan } from '../services/gemini';
+import { estimateFoodMacros } from '../services/gemini';
 
 export default function Nutrition() {
+  const navigate = useNavigate();
   const [logs, setLogs] = useState<NutritionLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [foodInput, setFoodInput] = useState('');
   const [estimating, setEstimating] = useState(false);
-  const [generatingPlan, setGeneratingPlan] = useState(false);
 
   useEffect(() => {
     const fetchNutritionData = async () => {
@@ -57,13 +58,6 @@ export default function Nutrition() {
       const macros = await estimateFoodMacros(foodInput);
       if (macros) {
         const today = new Date().toISOString().split('T')[0];
-        const existingLog = logs.find(l => l.date === today);
-
-        if (existingLog) {
-          // Update existing log logic would go here
-          // For simplicity, we'll just add a new log entry for now
-        }
-
         const newLog: Omit<NutritionLog, 'id'> = {
           studentId: auth.currentUser.uid,
           date: today,
@@ -101,173 +95,181 @@ export default function Nutrition() {
   };
 
   return (
-    <div className="p-6 sm:p-10 space-y-10 max-w-7xl mx-auto">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-5xl font-black italic tracking-tighter uppercase leading-none">
-            <HeaderTitle text="NUTRIÇÃO AI" />
-          </h1>
-          <p className="text-sm font-bold text-muted-foreground uppercase tracking-[0.3em] opacity-80">
-            Monitoramento inteligente de dieta.
-          </p>
+    <div className="min-h-screen bg-black text-white p-6 sm:p-10 space-y-8 max-w-3xl mx-auto relative pb-20">
+      {/* Status Bar */}
+      <div className="absolute top-6 right-6 flex items-center gap-3 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl z-10">
+        <RefreshCw size={12} className="text-white/40 animate-spin" />
+        <span className="text-[9px] font-black tracking-widest text-white/60 uppercase">CARREGANDO...</span>
+      </div>
+
+      <header className="flex items-center justify-between pt-4 mb-12">
+        <div className="flex items-center gap-4">
+          <button className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40">
+            <Menu size={20} />
+          </button>
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all"
+          >
+            <ArrowLeft size={20} />
+          </button>
         </div>
-        <button 
-          onClick={() => setGeneratingPlan(true)}
-          className="flex items-center gap-3 px-8 py-4 bg-red-600 text-white rounded-2xl font-black uppercase italic tracking-widest shadow-[0_0_30px_rgba(220,38,38,0.4)] hover:scale-105 transition-all"
-        >
-          <Sparkles size={18} /> Gerar Plano Diário
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-black italic tracking-tighter uppercase">NUTRIÇÃO <span className="text-red-600">AI</span></span>
+        </div>
       </header>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="p-8 space-y-8">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-black italic uppercase tracking-tighter text-foreground">
-                O que você <span className="text-red-600">comeu?</span>
-              </h3>
-              <div className="flex gap-2">
-                <button className="p-3 bg-secondary/30 rounded-xl text-muted-foreground hover:text-foreground transition-all">
-                  <Camera size={20} />
-                </button>
+      {/* Input Section */}
+      <Card className="p-8 bg-gradient-to-br from-white/5 to-white/[0.02] border-white/10">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-red-600">
+              <div className="w-1 h-3 bg-red-600 rounded-full" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/60">O QUE VOCÊ COMEU?</span>
+            </div>
+            <Sparkles size={18} className="text-red-600/40" />
+          </div>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="EX: 200G DE FRANGO E 150G DE ARROZ..."
+              value={foodInput}
+              onChange={(e) => setFoodInput(e.target.value)}
+              className="flex-1 px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-widest focus:outline-none focus:border-red-600 transition-colors"
+              onKeyPress={(e) => e.key === 'Enter' && handleEstimate()}
+            />
+            <button 
+              onClick={handleEstimate}
+              disabled={estimating}
+              className="w-14 h-14 bg-white text-black rounded-2xl flex items-center justify-center hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
+            >
+              {estimating ? <Loader2 className="animate-spin" size={20} /> : <Plus size={24} />}
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Summary Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <Card className="p-8 bg-white/[0.03] border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-sm font-black italic tracking-widest uppercase">DISTRIBUIÇÃO</h3>
+            <PieChartIcon size={16} className="text-white/20" />
+          </div>
+          <div className="h-40 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={70}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            {chartData.map((macro) => (
+              <div key={macro.name} className="text-center">
+                <div className="w-1 h-1 rounded-full mx-auto mb-1" style={{ backgroundColor: macro.color }} />
+                <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">{macro.name}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-8 bg-white/[0.03] border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-sm font-black italic tracking-widest uppercase">RESUMO</h3>
+            <Flame size={16} className="text-red-600/40" />
+          </div>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                <span className="text-white/40">CALORIAS</span>
+                <span className="text-white">{dailyTotals.calories} / 2500</span>
+              </div>
+              <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.4)]" 
+                  style={{ width: `${Math.min((dailyTotals.calories / 2500) * 100, 100)}%` }}
+                />
               </div>
             </div>
-            <div className="flex gap-4">
-              <input
-                type="text"
-                placeholder="EX: 200G DE FRANGO GRELHADO E 150G DE ARROZ..."
-                value={foodInput}
-                onChange={(e) => setFoodInput(e.target.value)}
-                className="flex-1 px-6 py-4 bg-secondary/30 border border-border rounded-2xl text-[11px] font-black uppercase tracking-widest focus:outline-none focus:border-red-600 transition-colors"
-                onKeyPress={(e) => e.key === 'Enter' && handleEstimate()}
-              />
-              <button 
-                onClick={handleEstimate}
-                disabled={estimating}
-                className="px-8 py-4 bg-foreground text-background rounded-2xl font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
-              >
-                {estimating ? <Loader2 className="animate-spin" size={20} /> : 'LOG'}
-              </button>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <span className="block text-lg font-black italic tracking-tighter text-white">{dailyTotals.protein}g</span>
+                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">PROT</span>
+              </div>
+              <div className="text-center">
+                <span className="block text-lg font-black italic tracking-tighter text-white">{dailyTotals.carbs}g</span>
+                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">CARB</span>
+              </div>
+              <div className="text-center">
+                <span className="block text-lg font-black italic tracking-tighter text-white">{dailyTotals.fat}g</span>
+                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">GORD</span>
+              </div>
             </div>
-          </Card>
+          </div>
+        </Card>
+      </div>
 
-          <section className="space-y-6">
-            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-foreground">
-              Refeições de <span className="text-red-600">Hoje</span>
-            </h2>
-            <div className="space-y-4">
-              <AnimatePresence mode="popLayout">
-                {logs.map((log, idx) => (
-                  <motion.div
-                    key={log.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: idx * 0.05 }}
-                  >
-                    <Card className="p-6 flex items-center justify-between group hover:bg-secondary/30 transition-colors">
-                      <div className="flex items-center gap-6">
-                        <div className="w-12 h-12 rounded-2xl bg-card border border-border flex items-center justify-center shadow-inner">
-                          <Apple className="text-red-600" size={20} />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-lg font-black italic uppercase tracking-tighter text-foreground leading-none mb-2">{log.meals[0]?.name}</span>
-                          <div className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                            <span className="flex items-center gap-1.5"><Clock size={12} /> {log.meals[0]?.time}</span>
-                            <span className="flex items-center gap-1.5"><Flame size={12} /> {log.meals[0]?.macros.calories} kcal</span>
-                            <span className="flex items-center gap-1.5 text-red-600">P: {log.meals[0]?.macros.protein}g</span>
-                            <span className="flex items-center gap-1.5 text-blue-600">C: {log.meals[0]?.macros.carbs}g</span>
-                            <span className="flex items-center gap-1.5 text-yellow-600">G: {log.meals[0]?.macros.fat}g</span>
-                          </div>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => handleDeleteLog(log.id!)}
-                        className="p-3 text-muted-foreground hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </Card>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </section>
+      {/* Meal List */}
+      <div className="space-y-6 pt-8">
+        <div className="flex items-center gap-3 text-white/40">
+          <Utensils size={18} />
+          <h3 className="text-sm font-black uppercase tracking-[0.3em]">REFEIÇÕES</h3>
         </div>
 
-        <div className="space-y-8">
-          <Card className="p-8 space-y-8">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-black italic uppercase tracking-tighter text-foreground">Distribuição</h3>
-              <PieChartIcon className="text-muted-foreground/40" size={18} />
-            </div>
-            <div className="h-48 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#18181b', border: 'none', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}
-                    itemStyle={{ color: '#fff' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="space-y-4">
-              {chartData.map((macro) => (
-                <div key={macro.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: macro.color }} />
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{macro.name}</span>
+        <div className="space-y-4">
+          <AnimatePresence mode="popLayout">
+            {logs.map((log, idx) => (
+              <motion.div
+                key={log.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: idx * 0.05 }}
+              >
+                <Card className="p-6 bg-white/[0.03] border-white/10 group relative overflow-hidden">
+                  <div className="flex items-center gap-6">
+                    <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-red-600">
+                      <Apple size={24} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="text-lg font-black italic uppercase tracking-tighter">{log.meals[0]?.name}</h4>
+                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{log.meals[0]?.time}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest">
+                        <span className="text-white/60">{log.meals[0]?.macros.calories} KCAL</span>
+                        <span className="text-red-600">P: {log.meals[0]?.macros.protein}G</span>
+                        <span className="text-blue-600">C: {log.meals[0]?.macros.carbs}G</span>
+                        <span className="text-yellow-600">G: {log.meals[0]?.macros.fat}G</span>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => handleDeleteLog(log.id!)}
+                      className="p-3 text-white/20 hover:text-red-600 transition-colors"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
-                  <span className="text-xs font-black italic text-foreground">{macro.value} kcal</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="p-8 space-y-6">
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-foreground">Resumo Diário</h3>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black uppercase italic tracking-widest">
-                  <span className="text-muted-foreground">Calorias</span>
-                  <span className="text-foreground">{dailyTotals.calories} / 2500 kcal</span>
-                </div>
-                <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.4)]" 
-                    style={{ width: `${Math.min((dailyTotals.calories / 2500) * 100, 100)}%` }}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center">
-                  <span className="block text-lg font-black italic tracking-tighter text-foreground">{dailyTotals.protein}g</span>
-                  <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Prot</span>
-                </div>
-                <div className="text-center">
-                  <span className="block text-lg font-black italic tracking-tighter text-foreground">{dailyTotals.carbs}g</span>
-                  <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Carb</span>
-                </div>
-                <div className="text-center">
-                  <span className="block text-lg font-black italic tracking-tighter text-foreground">{dailyTotals.fat}g</span>
-                  <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Gord</span>
-                </div>
-              </div>
-            </div>
-          </Card>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
     </div>
